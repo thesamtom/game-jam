@@ -1,0 +1,25 @@
+import { expect, test } from '@playwright/test';
+test('town camera, movement, and building collision', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  await page.goto('/?fast');
+  await page.getByRole('button', { name: 'New Game' }).click();
+  const state = () => page.evaluate(() => JSON.parse(window.render_game_to_text!()));
+  await expect.poll(async () => (await state()).district).toBe('POLICE QUARTER');
+  await expect.poll(async () => (await state()).objective).toBe('briefing');
+  await expect.poll(async () => (await state()).audio).toBe('running');
+  const first = await state();
+  await page.keyboard.down('w');
+  await page.waitForTimeout(1400);
+  await page.keyboard.up('w');
+  const stopped = await state();
+  expect(stopped.y).toBeLessThan(first.y - 15);
+  expect(stopped.y).toBeGreaterThan(140);
+  await page.keyboard.down('d');
+  await page.waitForTimeout(450);
+  await page.keyboard.up('d');
+  expect((await state()).x).toBeGreaterThan(first.x + 12);
+  await page.screenshot({ path: 'test-results/town.png' });
+  expect(errors).toEqual([]);
+});

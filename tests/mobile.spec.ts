@@ -1,0 +1,38 @@
+import { devices, expect, test } from '@playwright/test';
+import { at, start, state } from './helpers';
+
+test.use({ ...devices['iPhone 13'], browserName: 'webkit' });
+
+test('touch movement, dialogue, pause, mute, and reload work in mobile WebKit', async ({ page }) => {
+  const faults: string[] = [];
+  page.on('pageerror', error => faults.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') faults.push(message.text()); });
+  await start(page, '?fast');
+  await at(page, 'briefing');
+  const before = await state(page);
+  const right = page.getByRole('button', { name: 'Move right' });
+  await expect(right).toBeVisible();
+  const rect = await right.boundingBox();
+  if (!rect) throw new Error('Missing touch movement button');
+  await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
+  await page.mouse.down();
+  await expect.poll(async () => (await state(page)).x).toBeGreaterThan(before.x + 10);
+  await page.mouse.up();
+  await page.getByRole('button', { name: 'Pause' }).tap();
+  await expect(page.getByText('Paused', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Resume' }).tap();
+  await page.getByRole('button', { name: 'Mute' }).tap();
+  await expect(page.getByRole('button', { name: 'Unmute' })).toBeVisible();
+  await page.evaluate(() => window.randuTest!.place('raghavan'));
+  await page.getByRole('button', { name: 'Interact nearby' }).tap();
+  await expect(page.locator('.dialogue')).toBeVisible();
+  await expect(right).toBeHidden();
+  await page.getByRole('button', { name: 'Advance dialogue' }).tap();
+  await expect(page.locator('.dialogue p')).toContainText('Three raids.');
+  await page.screenshot({ path: '.qa/mobile-dialogue.png' });
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue' }).tap();
+  await at(page, 'briefing');
+  await expect(page.getByRole('button', { name: 'Unmute' })).toBeVisible();
+  expect(faults).toEqual([]);
+});

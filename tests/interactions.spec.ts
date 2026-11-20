@@ -1,0 +1,21 @@
+import { expect, test } from '@playwright/test';
+test('proximity dialogue reveals text and commits a choice', async ({ page }) => {
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
+  await page.goto('/?interaction');
+  await page.getByRole('button', { name: 'New Game' }).click();
+  await expect(page.getByRole('button', { name: /Call through the door/ })).toBeVisible();
+  await page.keyboard.press('e');
+  await expect(page.getByText('Shopkeeper', { exact: true })).toBeVisible();
+  await page.keyboard.press('Space');
+  await page.getByRole('button', { name: 'Keep your voice down. What can you pay today?' }).click();
+  await page.keyboard.press('Space');
+  await expect(page.getByText('What I have is by the west planter.', { exact: false })).toBeVisible();
+  await page.keyboard.press('Space');
+  await page.keyboard.press('Space');
+  await page.keyboard.press('Space');
+  await expect(page.locator('.dialogue')).toBeHidden();
+  await expect(page.locator('html')).toHaveAttribute('data-choice', 'quiet');
+  expect(errors).toEqual([]);
+});

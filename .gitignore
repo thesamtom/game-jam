@@ -1,0 +1,7 @@
+node_modules/
+dist/
+test-results/
+playwright-report/
+.qa/
+/kenney_tiny-city/
+/randu_tile_debug.png

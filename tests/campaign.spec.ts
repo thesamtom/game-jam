@@ -1,0 +1,103 @@
+import { expect, test } from '@playwright/test';
+import { at, drain, go, start, state } from './helpers';
+
+test('all nine chapters, checkpoint reload, scripted identity change, and credits', async ({ page }) => {
+  test.setTimeout(45000);
+  const errors: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('console', event => { if (event.type() === 'error') errors.push(event.text()); });
+  await start(page, '?fast');
+  await at(page, 'briefing');
+  await talk('raghavan');
+  await expect(page.locator('.dialogue')).toContainText('Kuttappan');
+  await drain(page);
+  await at(page, 'market');
+  await go(page, 'marketEntry');
+  await at(page, 'orders');
+  await talk('shaji');
+  await talk('package');
+  await talk('shopkeeper');
+  await talk('money');
+  await talk('kuttappan');
+  await at(page, 'tip');
+  await talk('phone');
+  await go(page, 'yardGate');
+  await at(page, 'van');
+  await go(page, 'van');
+  await page.keyboard.press('e');
+  await expect(page.locator('.dialogue')).toBeVisible();
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await at(page, 'van');
+  expect((await state(page)).choices.pressure).toBe('quiet');
+  await talk('van');
+  await expect(page.locator('.dialogue')).toContainText('Vishnu');
+  await drain(page);
+  await at(page, 'tail');
+  await go(page, 'huntLayby');
+  await expect.poll(async () => (await state(page)).tailReady, { timeout: 10000 }).toBe(true);
+  await go(page, 'handoff');
+  await expect(page.locator('.dialogue')).toContainText('Kuttappan');
+  await drain(page);
+  await at(page, 'clue');
+  await talk('handoff');
+  await at(page, 'towerIn');
+  await enter('roofDoor', 'meet');
+  await talk('meeting');
+  await at(page, 'injured');
+  await talk('shajiInjured');
+  await go(page, 'alleyExit');
+  await at(page, 'raid');
+  await talk('raidRendezvous');
+  await expect(page.locator('.dialogue')).toContainText('Kuttappan');
+  await drain(page);
+  await at(page, 'survive');
+  await go(page, 'raidExit');
+  await at(page, 'evidence');
+  await talk('evidence');
+  await talk('clinic');
+  await at(page, 'towerReturn');
+  await enter('roofDoor', 'arrest');
+  expect((await state(page)).identity).toBe('Alex');
+  await talk('meeting');
+  await expect(page.locator('.dialogue')).toContainText('Vishnu');
+  await drain(page);
+  await at(page, 'roofExit');
+  expect((await state(page)).identity).toBe('Vishnu');
+  await page.reload();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await at(page, 'roofExit');
+  expect((await state(page)).identity).toBe('Vishnu');
+  await enter('exit', 'goodbye');
+  expect((await state(page)).scene).toBe('Park');
+  await talk('bench');
+  await go(page, 'exit');
+  await at(page, 'home');
+  await talk('home');
+  await expect(page.getByText('The End', { exact: true })).toBeVisible();
+  await expect(page.getByText('Kenney · Tiny City · CC0')).toBeVisible();
+  await page.getByRole('button', { name: 'Return to title' }).click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await expect(page.getByText('The End', { exact: true })).toBeVisible();
+  expect(errors).toEqual([]);
+
+  async function talk(mark: string) {
+    await go(page, mark);
+    await page.keyboard.press('e');
+    await expect(page.locator('.dialogue')).toBeVisible();
+    await drain(page);
+  }
+  async function enter(mark: string, objective: string) {
+    await go(page, mark);
+    await page.keyboard.press('e');
+    await at(page, objective);
+  }
+});
+
+test('corrupted save disables Continue and permits a fresh game', async ({ page }) => {
+  await page.addInitScript(() => localStorage.setItem('randu-chaaran:campaign', '{"version":1,"scene":"Roof"}'));
+  await page.goto('/?fast');
+  await expect(page.getByRole('button', { name: 'Continue' })).toBeDisabled();
+  await page.getByRole('button', { name: 'New Game' }).click();
+  await at(page, 'briefing');
+});

@@ -1,0 +1,24 @@
+import { STAMP, TILE } from '../tiles';
+import { box, buildLayout, cell, patch, stamp } from './layout';
+
+export const roof = buildLayout(26, 20, '#2c3a40');
+patch(roof, 2, 1, 22, 17, '#59636c', '#65717a');
+patch(roof, 2, 1, 22, 1, '#b1aaa2');
+patch(roof, 2, 2, 22, .4, '#393d49');
+patch(roof, 2, 2, .6, 15, '#a2a5a2');
+patch(roof, 23.4, 2, .6, 15, '#a2a5a2');
+patch(roof, 2, 17, 22, 1, '#a2a5a2');
+patch(roof, 2, 18, 22, .5, '#48515a');
+patch(roof, 4, 2.5, 18, 1.1, '#777d7c');
+patch(roof, 4, 14, 18, 2, '#6a7374', '#787e7f');
+roof.solids.push(box(0, 0, 26, 2.2), box(0, 2, 2.6, 16), box(23.4, 2, 2.6, 16), box(0, 17.3, 26, 3));
+stamp(roof, 4, 9, STAMP.blueRoof, box(4.05, 9.05, 2.9, 2.9));
+stamp(roof, 19, 9, STAMP.brownRoof, box(19.05, 9.05, 2.9, 2.9));
+stamp(roof, 5, 4, [[TILE.bollard]], box(5.3, 4.3, .4, .5), true);
+stamp(roof, 20, 4, [[TILE.bollard]], box(20.3, 4.3, .4, .5), true);
+stamp(roof, 6, 15, STAMP.lamp, box(6.4, 16.3, .22, .52), true);
+stamp(roof, 19, 15, STAMP.lamp, box(19.4, 16.3, .22, .52), true);
+roof.lamps.push(cell(6, 15.4), cell(19, 15.4));
+roof.signs.push({ x: 13, y: 16.8, text: 'STAIRS  ▾', color: '#f9daa7' });
+roof.districts.push({ ...box(0, 0, 26, 20), title: 'ROOF TOWER • ROOFTOP' });
+roof.marks = { entry: cell(12, 15.3), meeting: cell(13, 4.9), exit: cell(12, 16.1) };
