@@ -8,6 +8,8 @@ test('touch movement, dialogue, pause, mute, and reload work in mobile WebKit', 
   page.on('pageerror', error => faults.push(error.message));
   page.on('console', message => { if (message.type() === 'error') faults.push(message.text()); });
   await start(page, '?fast');
+  expect(await page.evaluate(() => Array.from(document.fonts).some(face => face.family.includes('Pixelta') && face.status === 'loaded'))).toBe(true);
+  await expect(page.locator('.objective strong')).toHaveCSS('font-family', /Pixelta/);
   await at(page, 'briefing');
   const before = await state(page);
   const right = page.getByRole('button', { name: 'Move right' });
@@ -29,7 +31,8 @@ test('touch movement, dialogue, pause, mute, and reload work in mobile WebKit', 
   await expect(right).toBeHidden();
   await page.getByRole('button', { name: 'Advance dialogue' }).tap();
   await expect(page.locator('.dialogue p')).toContainText('Three raids.');
-  await page.screenshot({ path: '.qa/mobile-dialogue.png' });
+  await expect(page.locator('.dialogue p')).toHaveCSS('font-family', /Pixelta/);
+  await page.screenshot({ path: '.qa/pixelta-mobile-dialogue.png' });
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).tap();
   await at(page, 'briefing');
@@ -38,7 +41,8 @@ test('touch movement, dialogue, pause, mute, and reload work in mobile WebKit', 
   await expect(page.getByRole('heading', { name: 'Case File' })).toBeVisible();
   await page.getByRole('button', { name: 'Leads', exact: true }).tap();
   await expect(page.getByRole('heading', { name: 'Discovered Clues' })).toBeVisible();
-  await page.screenshot({ path: '.qa/expanded-case-mobile.png' });
+  await expect(page.locator('.case-file h2')).toHaveCSS('font-family', /Pixelta/);
+  await page.screenshot({ path: '.qa/pixelta-mobile-case.png' });
   await page.getByRole('button', { name: 'Close', exact: true }).tap();
   await expect(page.getByRole('button', { name: 'Move right' })).toBeVisible();
   expect(faults).toEqual([]);

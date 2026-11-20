@@ -10,11 +10,12 @@ import { FieldParkScene, FieldRoofScene } from './scenes/FieldDestinations';
 import { ChallengeScene } from './scenes/ChallengeScene';
 import { CreditsScene } from './scenes/CreditsScene';
 import './style.css';
+import { loadTypography } from './typography';
 
-new Phaser.Game({
+void loadTypography().then(() => new Phaser.Game({
   type: Phaser.CANVAS, parent: 'game', backgroundColor: '#17252a',
   pixelArt: true, roundPixels: true,
   scale: { mode: Phaser.Scale.RESIZE, width: window.innerWidth, height: window.innerHeight },
   physics: { default: 'arcade', arcade: { debug: false } },
   scene: [BootScene, TileDebugScene, TitleScene, TownScene, RoofScene, ParkScene, UIScene, CreditsScene, ChallengeScene, FieldParkScene, FieldRoofScene]
-});
+}));

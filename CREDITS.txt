@@ -6,4 +6,6 @@ Game concept and story supplied by the project author.
 Pixel art: Tiny City by Kenney (www.kenney.nl).
 Creative Commons CC0 1.0 Universal. See public/assets/kenney/License.txt.
 
+Typeface: Pixelta by Blankids Studio, supplied personal-use copy.
+
 Audio is synthesized in the browser.

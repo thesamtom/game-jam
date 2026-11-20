@@ -1,4 +1,5 @@
 import Phaser from 'phaser';
+import { supportedWorldText } from '../typography';
 import { TILE_SIZE, validTile } from '../data/tiles';
 import type { Layout } from '../data/maps/layout';
 
@@ -57,8 +58,8 @@ export function renderWorld(scene: Phaser.Scene, layout: Layout) {
   }
   renderLampPools(scene, layout);
   for (const sign of layout.signs) {
-    scene.add.text(sign.x * 16, sign.y * 16, sign.text, {
-      fontFamily: '"Noto Sans Malayalam", system-ui, sans-serif', fontSize: '6px', resolution: 2, fontStyle: 'bold',
+    scene.add.text(sign.x * 16, sign.y * 16, supportedWorldText(sign.text), {
+      fontSize: 8, resolution: 2,
       color: sign.color, backgroundColor: '#253139', padding: { x: 2, y: 1 }
     }).setOrigin(.5).setDepth(5000).setName('street-sign').setData('streetLabel', sign.text);
   }

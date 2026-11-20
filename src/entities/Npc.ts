@@ -53,7 +53,7 @@ export class Npc {
     this.shadow = scene.add.ellipse(point.x, point.y, 13, 5, 0x192125, .54);
     this.image = scene.add.image(point.x, point.y, actorTexture(scene, name)).setOrigin(.5, .85);
     this.label = scene.add.text(point.x, point.y - 17, name in CAST ? CAST[name as Character].name : name,
-      { fontSize: '7px', resolution: 2, fontFamily: 'system-ui', fontStyle: 'bold', color: '#f9e5b7', stroke: '#1b2530', strokeThickness: 2 })
+      { fontSize: 8, resolution: 2, color: '#f9e5b7', stroke: '#1b2530', strokeThickness: 2 })
       .setOrigin(.5, 1).setDepth(4000).setVisible(showName);
     this.update(0);
   }

@@ -20,7 +20,7 @@ export class Player {
     this.shadow = scene.add.ellipse(point.x, point.y, 13, 5, 0x172022, .58);
     this.actor = scene.add.image(point.x, point.y, actorTexture(scene, identity)).setOrigin(.5, .85);
     this.label = scene.add.text(point.x, point.y - 17, identity, {
-      fontSize: '7px', resolution: 2, fontFamily: 'system-ui', fontStyle: 'bold', color: '#f9e5b7', stroke: '#1b2530', strokeThickness: 2
+      fontSize: 8, resolution: 2, color: '#f9e5b7', stroke: '#1b2530', strokeThickness: 2
     }).setOrigin(.5, 1).setDepth(4000).setVisible(false);
     this.previousX = point.x;
     this.previousY = point.y;

@@ -48,6 +48,10 @@ Serve the contents of `dist/` with a static HTTP server. Use `npm run preview` l
 
 `src/data` holds the ordered objectives, dialogue, scene scripts and tile layouts. `src/scenes` handles the title, town, roof, park, credits and UI. `src/systems` handles input, checkpoints, audio, dialogue, scripted scenes, and stealth. `tests` covers the development build, and `checks` verifies the production preview.
 
+## Local typography
+
+For a fresh local checkout, place your supplied, personal-use Pixelta TTF at `public/assets/fonts/Pixelta.ttf`. The font file stays in the local workspace. Malayalam signage uses a compatible installed font when available and otherwise shows its English label.
+
 ## Assets and credits
 
-All sprite and tile art comes from the supplied **Tiny City** pack by **Kenney**, released under **CC0**. The game reads the packed 192 × 176 sheet as 132 zero-spaced 16 × 16 frames. Procedural geometry supplies pavement markings, lamps, visual effects and captions. Audio is synthesized with WebAudio. Malayalam signage uses Noto Sans Malayalam when installed and the browser’s local font fallback otherwise. See [CREDITS.txt](CREDITS.txt) and the [Kenney license](public/assets/kenney/License.txt).
+All sprite and tile art comes from the supplied **Tiny City** pack by **Kenney**, released under **CC0**. The game reads the packed 192 × 176 sheet as 132 zero-spaced 16 × 16 frames. Procedural geometry supplies pavement markings, lamps, visual effects and captions. Audio is synthesized with WebAudio. See [CREDITS.txt](CREDITS.txt) and the [Kenney license](public/assets/kenney/License.txt).
