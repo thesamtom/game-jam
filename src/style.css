@@ -22,6 +22,47 @@ body { color: #f5ecd7; font-family: system-ui, sans-serif; }
 .credits-inner dt { color: #e2ad76; }
 .credits-inner dd { margin: 0; }
 .credits-note { color: #c2c2b7; font-size: .8rem; margin-bottom: 1.5rem; }
+.field-panel { position: absolute; z-index: 6; pointer-events: auto; left: 50%; bottom: max(18px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(580px, calc(100% - 24px)); max-height: 70vh; overflow: auto; padding: 1rem; background: #14252bf8; border: 1px solid #7aac9c; box-shadow: 0 12px 36px #101619aa; }
+.field-notice { z-index: 5; position: absolute; top: max(100px, 16%); right: max(12px, env(safe-area-inset-right)); max-width: min(290px, calc(100vw - 24px)); background: #10272eeb; color: #b9e4cf; border-left: 2px solid #8ec6ac; font-size: .78rem; line-height: 1.45; padding: .5rem .7rem; white-space: pre-line; }
+.game-ui:has(.cinematic:not([hidden])) .field-notice { visibility: hidden; }
+.case-file { top: max(45px, 8vh); bottom: max(24px, 8vh); display: flex; flex-direction: column; width: min(750px, calc(100% - 24px)); max-height: none; overflow: hidden; }
+.case-file header { position: relative; }
+.case-file header .icon-button { position: absolute; top: 0; right: 0; }
+.case-file header h2 { font-size: clamp(2rem, 6vw, 3.2rem); margin-block: .2rem; }
+.case-file .file-meta { margin: 0 0 .65rem; color: #94c6b9; font-weight: 600; }
+.case-file nav { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.case-file nav button { text-align: center; padding-inline: 0; }
+.case-file nav button[aria-current] { background: #29433f; color: #c2e7d2; border-color: #83b2a0; }
+.file-body { min-height: 0; overflow-y: auto; padding: .65rem .45rem 0; }
+.file-body h3 { color: #dfbd8d; font-size: .84rem; letter-spacing: .08em; margin: 1.15rem 0 .45rem; }
+.file-body article { padding: .55rem 0; border-bottom: 1px solid #415450; }
+.file-body article p { margin: .25rem 0 0; color: #c3d1c9; font-size: .88rem; }
+.field-panel > .menu-button + .menu-button { margin-left: .3rem; }
+@media (max-width: 620px) {
+  .utility :first-child { min-width: 34px; }
+  .utility { flex-wrap: wrap; justify-content: flex-end; max-width: 108px; }
+  .utility .icon-button { font-size: .68rem; }
+  .case-file { padding: .75rem; }
+  .field-panel > .menu-button { margin: .15rem !important; }
+}
+.file-town-map { position: relative; isolation: isolate; width: 100%; height: clamp(120px, 21vh, 190px); background: linear-gradient(90deg, #182b31 42%, #42575b 42% 55%, #182b31 55%); border: 1px solid #496160; }
+.file-town-map::before { position: absolute; content: ''; left: 0; right: 0; top: 44%; height: 14%; background: #42575b; z-index: -1; }
+.file-town-map span { position: absolute; display: grid; place-items: center; text-align: center; font-size: clamp(.48rem, 2vw, .73rem); line-height: 1; padding: 0 2px; border: 1px solid #6f8e82; }
+.file-town-map .charted { background: #355c51; color: #d6e9d1; }
+.file-town-map .uncharted { background: #20343a; color: #a6b8b7; border-style: dashed; }
+.file-town-map span:last-child { left: 38% !important; width: 24% !important; }
+.file-icon { display: inline-block; width: 24px; height: 24px; margin-right: .45rem; vertical-align: middle; background-size: 288px 264px; image-rendering: pixelated; }
+.vignette.field-tone { background: radial-gradient(ellipse at 52% 53%, transparent 39%, #0e1c2b76 100%), var(--town-grade); }
+.reward-reveal { border-color: #d3a45f; animation: reward-in 280ms ease-out both; }
+@keyframes reward-in { from { opacity: 0; transform: translate(-50%, 9px); } to { opacity: 1; transform: translate(-50%, 0); } }
+@media (prefers-reduced-motion: reduce) { .reward-reveal { animation: none; } }
+.case-file .copper-seal > .eyebrow { color: #f1a56d; }
+.title-records { padding: .7rem; background: #14262df2; border: 1px solid #6d8175; }
+.title-records article { margin-bottom: .7rem; }
+.field-panel h2 { font: 2rem Georgia, serif; margin: .3rem 0 .6rem; }
+.field-panel p { line-height: 1.5; }
+.field-open .touch { visibility: hidden; }
+.game-ui:has(.case-file:not([hidden])) :is(.objective, .utility, .district, .suspicion, .field-notice) { visibility: hidden; }
 [hidden] { display: none !important; }
 button { font: inherit; color: inherit; cursor: pointer; }
 button:focus-visible { outline: 2px solid #f2c380; outline-offset: 4px; }
@@ -93,4 +134,5 @@ button:focus-visible { outline: 2px solid #f2c380; outline-offset: 4px; }
   .dialogue { max-height: calc(100% - 50px); overflow: auto; }
 }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+@media (max-width: 620px) { .game-ui .suspicion { top: max(94px, calc(env(safe-area-inset-top) + 88px)); } }
 .cinematic p { font: clamp(1.25rem, 3vw, 2.65rem)/1.28 Georgia, serif; text-wrap: balance; max-width: 32ch; margin: .65rem 0 0; color: #f1e5cf; }

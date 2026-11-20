@@ -1,10 +1,10 @@
 export type Direction = 'up' | 'down' | 'left' | 'right';
-export type InputAction = 'interact' | 'advance' | 'pause' | 'mute';
+export type InputAction = 'interact' | 'advance' | 'pause' | 'mute' | 'case';
 const directionByCode: Record<string, Direction> = {
   KeyW: 'up', ArrowUp: 'up', KeyS: 'down', ArrowDown: 'down',
   KeyA: 'left', ArrowLeft: 'left', KeyD: 'right', ArrowRight: 'right'
 };
-const actionByCode: Record<string, InputAction> = { KeyE: 'interact', Space: 'advance', Escape: 'pause', KeyM: 'mute' };
+const actionByCode: Record<string, InputAction> = { KeyE: 'interact', Space: 'advance', Escape: 'pause', KeyM: 'mute', KeyJ: 'case' };
 
 export class Input {
   private keys = new Set<string>();

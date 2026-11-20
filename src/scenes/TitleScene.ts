@@ -6,6 +6,8 @@ import { debugCampaign, loadCampaign, saveCampaign } from '../systems/Save';
 import { button, interfaceRoot } from './UIScene';
 import { renderWorld } from './WorldView';
 import { Npc } from '../entities/Npc';
+import { renderChallengeBoard } from './ChallengeBoard';
+import type { ChallengeLaunch } from './ChallengeScene';
 import { audio } from '../systems/Audio';
 
 export class TitleScene extends Phaser.Scene {
@@ -51,8 +53,21 @@ export class TitleScene extends Phaser.Scene {
     continueButton.disabled = !saved;
     nav.append(button('New Game', newGame, 'menu-button primary'), continueButton,
       button('Controls', () => {
-        help.hidden = !help.hidden;
-        help.textContent = 'WASD or arrows to move · E to interact · E or Space to read · Esc to pause · M to mute. On touchscreens, use the D-pad and action buttons.';
+        help.hidden = !help.hidden && !help.classList.contains('title-records');
+        help.classList.remove('title-records');
+        help.textContent = 'WASD or arrows to move · E to interact · E or Space to read · Esc to pause · M to mute · J for the Case File. On touchscreens, use the D-pad and action buttons.';
+      }, 'menu-button'), button('Challenge Records', () => {
+        help.hidden = false;
+        help.replaceChildren();
+        help.classList.add('title-records');
+        renderChallengeBoard(help, saved?.campaign, id => {
+          audio.unlock();
+          const launch: ChallengeLaunch = {
+            id, identity: saved?.campaign.identity ?? 'Alex', difficulty: (saved?.campaign.chapter ?? 0) >= 6 ? 5 : 0,
+            done: () => this.scene.start('Title')
+          };
+          this.scene.start('Challenge', launch);
+        }, true);
       }, 'menu-button'), button('Credits', () => this.scene.start('Credits'), 'menu-button'));
     interfaceRoot().append(poster);
     this.events.once('shutdown', () => poster.remove());

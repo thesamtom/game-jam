@@ -18,7 +18,7 @@ test('built browser game loads local assets and omits development hooks', async 
   await page.keyboard.press('Space');
   await expect(page.locator('.dialogue p')).toContainText('Three raids.');
   const globals = await page.evaluate(() => ({
-    test: 'randuTest' in window,
+    test: 'randuTest' in window || 'challengeTest' in window,
     snapshot: 'render_game_to_text' in window
   }));
   expect(globals).toEqual({ test: false, snapshot: false });

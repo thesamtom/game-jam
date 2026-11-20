@@ -69,12 +69,12 @@ export class UI {
     window.clearTimeout(this.districtTimer);
     this.districtTimer = window.setTimeout(() => this.district.hidden = true, 2500);
   }
-  setSuspicion(value?: number) {
+  setSuspicion(value?: number, warning = .7) {
     this.suspicion.hidden = value === undefined;
     if (value === undefined) return;
-    this.suspicion.querySelector('span')!.textContent = value > .7 ? 'ABOUT TO BE SEEN' : value > 0 ? 'SUSPICION' : 'UNSEEN';
+    this.suspicion.querySelector('span')!.textContent = value > warning ? 'ABOUT TO BE SEEN' : value > 0 ? 'SUSPICION' : 'UNSEEN';
     this.suspicion.querySelector('meter')!.value = value;
-    this.suspicion.classList.toggle('alert', value > .65);
+    this.suspicion.classList.toggle('alert', value > warning);
   }
   destroy() { window.clearTimeout(this.districtTimer); this.root.remove(); }
 }

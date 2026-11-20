@@ -15,12 +15,24 @@ import { DialogueManager } from '../systems/DialogueManager';
 import { dialogue, type DialogueId } from '../data/dialogue';
 import { QuestManager, type Campaign } from '../systems/QuestManager';
 import type { Objective, Place } from '../data/chapters';
-import { renderWorld } from './WorldView';
+import { challenges } from '../data/challenges';
+import { unlocked } from '../data/discoveries';
+import { ChallengeManager } from '../systems/ChallengeManager';
+import type { ChallengeLaunch } from './ChallengeScene';
+import { FieldView } from './FieldView';
+import { currentRank } from '../systems/ProgressionManager';
+import { activities } from '../data/activities';
+import { discoveries } from '../data/discoveries';
+import { TownStateManager } from '../systems/TownStateManager';
+import { dressWorld, renderWorld } from './WorldView';
+
+export interface RoamLaunch { campaign: Campaign; roam: true; back?: () => void }
 
 interface TestDriver {
   place: (mark: string) => void;
   advance: () => boolean | 'choice';
   expose: (enabled: boolean) => void;
+  fieldPlace: (id: string) => void;
 }
 declare global {
   interface Window { render_game_to_text?: () => string; randuTest?: TestDriver }
@@ -41,16 +53,33 @@ export class CampaignScene extends Phaser.Scene {
   private marker!: Phaser.GameObjects.Graphics;
   private notice = '';
   private paused = false;
+  private sideSceneActive = false;
+  private roaming = false;
+  private backFromVisit?: () => void;
+  private townState!: TownStateManager;
+  private ambient?: Stealth;
+  private ambientName?: Npc;
+  private debugSnapshot?: () => string;
+  private debugDriver?: TestDriver;
+  private field!: FieldView;
   private muteButton!: HTMLButtonElement;
   private stealth?: Stealth;
   private stealthCheckpoint?: Point;
   private exposeForTest = false;
-  constructor(readonly place: Place, protected readonly layout: Layout) { super(place); }
+  constructor(readonly place: Place, protected readonly layout: Layout, key: string = place) { super(key); }
 
-  create(state: Campaign) {
+  create(input: Campaign | RoamLaunch) {
+    const visit = 'roam' in input ? input : undefined;
+    const state = 'roam' in input ? input.campaign : input;
+    this.roaming = Boolean(visit);
+    this.backFromVisit = visit?.back;
+    this.townState = new TownStateManager(state);
     this.quest = new QuestManager(state);
     this.busy = false;
     this.paused = false;
+    this.sideSceneActive = false;
+    this.ambient = undefined;
+    this.ambientName = undefined;
     this.district = '';
     this.announcedDistricts.clear();
     this.npcs = [];
@@ -59,7 +88,8 @@ export class CampaignScene extends Phaser.Scene {
     const solids = renderWorld(this, this.layout);
     const map = maps[this.place];
     const chapterPoint = map.marks[this.quest.chapter.checkpoint];
-    const start = state.position ?? (this.quest.step.spawn ? this.mark(this.quest.step.spawn) : chapterPoint)
+    const roamStart = this.roaming ? map.marks[this.place === 'Town' ? 'homeStart' : 'entry'] : undefined;
+    const start = roamStart ?? state.position ?? (this.quest.step.spawn ? this.mark(this.quest.step.spawn) : chapterPoint)
       ?? (this.step.at ? this.mark(this.step.at) : Object.values(map.marks)[0]);
     this.player = new Player(this, start, state.identity);
     this.physics.add.collider(this.player.anchor, solids);
@@ -69,6 +99,9 @@ export class CampaignScene extends Phaser.Scene {
     this.game.events.emit('hud:mount', this.hud.root);
     this.conversation = new DialogueManager(this.hud.dialogue);
     this.controls = new Input(action => this.action(action), () => audio.unlock());
+    this.field = new FieldView(this, this.place, state, this.hud.root, () => saveCampaign(state), () => {
+      this.player.stop(); this.controls.clear();
+    }, id => this.launchChallenge(id));
     this.bindInterface();
     this.fx = new CutsceneRunner(this, this.hud.caption, locked => {
       if (locked) { this.player.stop(); this.controls.clear(); }
@@ -79,9 +112,17 @@ export class CampaignScene extends Phaser.Scene {
       this.controls.destroy();
       this.conversation.close();
       this.hud.destroy();
-      if (import.meta.env.DEV) { delete window.randuTest; delete window.render_game_to_text; }
+      if (import.meta.env.DEV) {
+        if (window.randuTest === this.debugDriver) delete window.randuTest;
+        if (window.render_game_to_text === this.debugSnapshot) delete window.render_game_to_text;
+      }
     });
-    this.beginObjective(true);
+    if (this.roaming) {
+      this.currentTarget = undefined;
+      this.refreshTown();
+      this.hud.setObjective('Optional exploration', this.backFromVisit ? 'Explore the ' + (this.place === 'Park' ? 'park' : 'rooftop') : 'Explore Karimkunnu',
+        this.backFromVisit ? 'Return to the entrance when you’re ready.' : 'Review unfinished leads in the Case File.');
+    } else this.beginObjective(true);
     this.cameras.main.fadeIn(275, 13, 19, 25);
   }
 
@@ -109,14 +150,37 @@ export class CampaignScene extends Phaser.Scene {
     if (step.actor && this.currentTarget) this.addNpc(step.actor, this.currentTarget);
     if (step.id === 'briefing') this.addNpc('Hamsa', { x: this.mark('raghavan').x + 24, y: this.mark('raghavan').y + 3 });
     if (step.id === 'tail' || step.id === 'survive') this.startStealth(step.id);
-    this.hud.vignette.classList.toggle('night', this.quest.state.chapter >= 3 && this.quest.state.chapter < 9);
-    this.setAmbience();
+    this.refreshTown();
+    this.field.achievements();
     this.notice = '';
     this.presentObjective();
     this.quest.state.position = safePosition(this.place, this.position) ? this.position : undefined;
     saveCampaign(this.quest.state);
     if (step.mode === 'auto') this.time.delayedCall(80, () => void this.activate(step));
   }
+  private refreshTown() {
+    this.townState.sync();
+    const settings = this.townState.settings;
+    this.hud.vignette.classList.add('field-tone');
+    this.hud.vignette.style.setProperty('--town-grade', settings.grading);
+    dressWorld(this, settings.lamp, settings.yard);
+    this.ambient?.destroy();
+    this.ambient = undefined;
+    this.ambientName = undefined;
+    if (!this.stealth && this.place === 'Town' && settings.watch && this.step.mode !== 'auto'
+      && !this.npcs.some(actor => actor.name === settings.watch)) {
+      const actor = this.addNpc(settings.watch, { ...settings.route[0] });
+      actor.label.setVisible(true);
+      this.ambientName = actor;
+      this.ambient = new Stealth(this, [{
+        actor, waypoints: settings.route, speed: 17, facing: Math.PI / 2,
+        angle: .50, range: 40, loop: true, wait: 400
+      }], this.layout.solids);
+    }
+    this.field.refresh();
+    this.setAmbience();
+  }
+
   private startStealth(id: string) {
     this.stealthCheckpoint = this.position;
     if (id === 'tail') {
@@ -140,6 +204,8 @@ export class CampaignScene extends Phaser.Scene {
     this.controls.clear();
     this.fx.flash(260, 220, 48, 52);
     this.fx.sound('alert');
+    this.field.progression.spotted(this.step.id);
+    saveCampaign(this.quest.state);
     await this.fx.wait(330);
     await this.fx.fade(true, 260);
     if (!this.sys.isActive() || !this.stealth || !this.stealthCheckpoint) return;
@@ -161,7 +227,8 @@ export class CampaignScene extends Phaser.Scene {
     pause.setAttribute('aria-label', 'Pause');
     this.muteButton = button('', () => this.controls.press('mute'), 'icon-button');
     this.updateMuteButton();
-    this.hud.utility.append(this.muteButton, pause);
+    const file = button('Case File', () => this.controls.press('case'), 'icon-button');
+    this.hud.utility.append(file, this.muteButton, pause);
     const pad = document.createElement('div');
     pad.className = 'd-pad';
     const labels: [Direction, string][] = [['up', '▲'], ['left', '◀'], ['down', '▼'], ['right', '▶']];
@@ -182,10 +249,10 @@ export class CampaignScene extends Phaser.Scene {
   }
 
   private setAmbience() {
-    const level = this.step.id === 'funeral' || this.step.id === 'home' ? 0
+    const level = !this.roaming && (this.step.id === 'funeral' || this.step.id === 'home') ? 0
       : this.quest.state.chapter === 9 ? .12
       : this.stealth || this.place === 'Roof' ? .72
-      : this.quest.state.chapter >= 3 ? .47 : .25;
+      : this.townState.settings.ambience;
     audio.ambience(this.paused || this.step.id === 'opening' ? 0 : level);
   }
 
@@ -204,21 +271,109 @@ export class CampaignScene extends Phaser.Scene {
     const detail = document.createElement('p');
     detail.textContent = 'Continue returns you to the last story checkpoint.';
     const resume = button('Resume', () => this.pause(), 'menu-button primary');
-    box.append(heading, detail, resume, button('Return to title', () => this.scene.start('Title'), 'menu-button'));
+    box.append(heading, detail, resume, this.backFromVisit
+      ? button('Return to town', () => this.exitVisit(), 'menu-button')
+      : button('Return to title', () => this.scene.start('Title'), 'menu-button'));
     this.hud.pausePanel.replaceChildren(box);
     resume.focus();
   }
 
   protected action(action: InputAction) {
+    if (this.sideSceneActive) return;
     if (action === 'mute') { audio.toggle(); this.updateMuteButton(); return; }
+    if (this.field.active) {
+      if (action === 'pause' || action === 'case') this.field.close();
+      return;
+    }
     if (action === 'pause') { this.pause(); return; }
     if (this.paused) return;
+    if (action === 'case' && !this.busy && !this.conversation.active) { this.field.openFile(); return; }
     if (this.conversation.active) {
       if (action === 'interact' || action === 'advance') this.conversation.advance();
       return;
     }
-    if (this.busy || action !== 'interact' || this.step.mode !== 'interact') return;
-    if (this.nearTarget()) { audio.play('interact'); void this.activate(this.step); }
+    if (this.busy || action !== 'interact') return;
+    if (!this.roaming && this.step.mode === 'interact' && this.nearTarget()) { audio.play('interact'); void this.activate(this.step); }
+    else if (!this.stealth && this.field.prompt) this.field.interact();
+    else if (!this.stealth) this.useLocalInteraction();
+  }
+
+  private nearbyPortal() {
+    if (this.stealth) return undefined;
+    const near = (mark: string) => Math.hypot(this.player.x - this.mark(mark).x, this.player.y - this.mark(mark).y) < 20;
+    if (this.backFromVisit && near('entry')) return 'Back to Karimkunnu';
+    if (this.place !== 'Town') return undefined;
+    if (near('parkPath')) return 'Visit Town Park';
+    if (this.quest.state.flags.includes('meet') && near('roofVisit')) return 'Revisit the rooftop';
+    return undefined;
+  }
+
+  private useLocalInteraction() {
+    const portal = this.nearbyPortal();
+    if (portal === 'Back to Karimkunnu') { this.exitVisit(); return; }
+    if (portal) {
+      const launch: RoamLaunch = { campaign: this.quest.state, roam: true, back: () => this.resumeSideScene() };
+      this.suspendSideScene(portal === 'Visit Town Park' ? 'FieldPark' : 'FieldRoof', launch);
+      return;
+    }
+    if (this.nearWatch()) this.field.show(this.ambientName!.name, this.townState.greeting(), 'Optional conversation');
+  }
+
+  private nearWatch() {
+    const actor = this.ambientName;
+    return actor && Math.hypot(actor.point.x - this.player.x, actor.point.y - this.player.y) < 15;
+  }
+
+  private suspendSideScene(key: string, data: RoamLaunch | ChallengeLaunch) {
+    this.sideSceneActive = true;
+    this.field.close();
+    this.player.stop();
+    this.controls.clear();
+    this.hud.root.hidden = true;
+    this.scene.launch(key, data);
+    this.scene.pause();
+  }
+
+  private resumeSideScene() {
+    this.controls.clear();
+    this.updateMuteButton();
+    this.sideSceneActive = false;
+    this.hud.root.hidden = false;
+    this.field.refresh();
+    this.setAmbience();
+    if (import.meta.env.DEV) this.installTestDriver();
+    this.scene.resume();
+  }
+
+  private exitVisit() {
+    this.scene.stop();
+    this.backFromVisit?.();
+  }
+
+  private launchChallenge(id: string) {
+    const mission = challenges.find(entry => entry.id === id);
+    const campaign = this.quest.state;
+    const first = !Object.hasOwn(campaign.field.records, id);
+    if (!mission || first && !unlocked(mission.unlock, campaign) || this.busy || this.sideSceneActive || this.conversation.active) return;
+    let alerted = false;
+    const settings: ChallengeLaunch = {
+      id, identity: campaign.identity, difficulty: campaign.chapter >= 6 ? 5 : 0,
+      spotted: first ? () => {
+        if (alerted) return;
+        alerted = true;
+        this.field.progression.reputation(0, 4, 'Seen during a challenge');
+        saveCampaign(campaign);
+      } : undefined,
+      complete: first ? result => {
+        ChallengeManager.best(campaign.field.records, id, result);
+        this.field.progression.award(mission.xp, mission.title);
+        campaign.field.investigation++;
+        this.field.achievements();
+        saveCampaign(campaign);
+      } : undefined,
+      done: () => this.resumeSideScene()
+    };
+    this.suspendSideScene('Challenge', settings);
   }
 
   protected async activate(step: Objective) {
@@ -232,6 +387,10 @@ export class CampaignScene extends Phaser.Scene {
     if (!this.sys.isActive()) return;
     const result = this.quest.complete(step.id);
     this.busy = false;
+    if (result !== 'ignored') {
+      this.field.progression.story(step.id);
+      this.field.achievements();
+    }
     if (result === 'credits') {
       saveCampaign(this.quest.state, true);
       this.fx.changeScene('Credits', { ending: true });
@@ -247,6 +406,7 @@ export class CampaignScene extends Phaser.Scene {
       this.fx.changeScene(next.scene, state);
       return;
     }
+    if (result === 'chapter') this.field.progression.reputation(0, -6, 'The town’s attention moved on');
     if (result === 'chapter') this.hud.setDistrict(`CHAPTER ${this.quest.chapter.id} — ${this.quest.chapter.title.toUpperCase()}`);
     this.beginObjective();
   }
@@ -302,7 +462,7 @@ export class CampaignScene extends Phaser.Scene {
     return this.currentTarget && Math.hypot(this.player.x - this.currentTarget.x, this.player.y - this.currentTarget.y) < 22;
   }
   update(time: number, delta: number) {
-    const moving = !this.paused && !this.busy && !this.conversation.active;
+    const moving = !this.paused && !this.field.active && !this.busy && !this.conversation.active;
     this.conversation.update(delta);
     if (this.player.update(time, delta, this.controls.x, this.controls.y, moving, this.quest.state.chapter === 9 ? 54 : 71) && moving) audio.play('step');
     if (this.stealth) {
@@ -311,9 +471,10 @@ export class CampaignScene extends Phaser.Scene {
         this.player.place({ x: watcher.actor.point.x + Math.cos(watcher.facing) * 9, y: watcher.actor.point.y + Math.sin(watcher.facing) * 9 });
       }
       this.stealth.update(delta, this.position, moving && !this.fx.active);
-      this.hud.setSuspicion(this.stealth.suspicion);
+      this.hud.setSuspicion(this.stealth.suspicion, currentRank(this.quest.state.field.xp).warning);
       if (moving && this.stealth.seen) { void this.retryStealth(); return; }
     }
+    this.updateAmbient(delta, moving);
     for (const actor of this.npcs) actor.update(time);
     const district = this.layout.districts.find(d => this.player.x >= d.x * 16 && this.player.x < (d.x + d.w) * 16
       && this.player.y >= d.y * 16 && this.player.y < (d.y + d.h) * 16)?.title ?? 'KARIMKUNNU';
@@ -322,12 +483,22 @@ export class CampaignScene extends Phaser.Scene {
       if (district !== 'KARIMKUNNU' && !this.announcedDistricts.has(district)) {
         this.announcedDistricts.add(district);
         this.hud.setDistrict(district);
+
       }
     }
+    if (moving && this.townState.district(district)) {
+      if (this.quest.state.field.visits > 1) this.field.progression.reputation(0, -3, 'Moved to another district');
+      this.field.visit(district);
+      this.field.refresh();
+      saveCampaign(this.quest.state);
+    }
     const near = Boolean(this.nearTarget());
-    this.hud.prompt.hidden = !moving || !near || this.step.mode !== 'interact';
-    this.hud.touch.classList.toggle('near', moving && near && this.step.mode === 'interact');
-    if (!this.hud.prompt.hidden) this.hud.prompt.textContent = `E · ${this.step.prompt ?? 'Interact'}`;
+    this.field.update(this.position, moving && !this.stealth);
+    const prompt = !this.roaming && near && this.step.mode === 'interact' ? this.step.prompt ?? 'Interact'
+      : this.field.prompt ?? this.nearbyPortal() ?? (this.nearWatch() ? 'Speak to ' + this.ambientName!.name : undefined);
+    this.hud.prompt.hidden = !moving || !prompt;
+    this.hud.touch.classList.toggle('near', moving && Boolean(prompt));
+    if (!this.hud.prompt.hidden) this.hud.prompt.textContent = `E · ${prompt}`;
     const actor = this.npcs.find(npc => npc.name === this.step.actor);
     if (actor && !this.conversation.active) actor.label.setVisible(near && moving);
     this.marker.clear();
@@ -346,19 +517,40 @@ export class CampaignScene extends Phaser.Scene {
       const direction = near ? 'Nearby' : Math.abs(dx) > Math.abs(dy) ? dx > 0 ? 'East →' : '← West' : dy > 0 ? 'South ↓' : '↑ North';
       if (direction !== this.notice) { this.notice = direction; this.presentObjective(direction); }
     }
-    if (moving && near && (this.step.mode === 'arrive' || this.step.mode === 'tail' && this.stealth?.complete)) void this.activate(this.step);
+    if (!this.roaming && moving && near && (this.step.mode === 'arrive' || this.step.mode === 'tail' && this.stealth?.complete)) void this.activate(this.step);
+  }
+
+  private updateAmbient(delta: number, moving: boolean) {
+    const patrol = this.ambient;
+    if (!patrol) return;
+    const field = this.quest.state.field;
+    const canAlert = this.townState.settings.attention && !field.ambientAlerts.includes(this.townState.mood);
+    patrol.update(delta, canAlert ? this.position : { x: -1000, y: -1000 }, moving);
+    if (!canAlert || !patrol.seen) return;
+    field.ambientAlerts.push(this.townState.mood);
+    this.field.progression.reputation(0, 6, 'A patrol noticed you in its lane');
+    this.field.refresh();
+    patrol.reset();
+    saveCampaign(this.quest.state);
   }
 
   private installTestDriver() {
-    window.render_game_to_text = () => this.step.scene !== this.place ? 'null' : JSON.stringify({
+    this.debugSnapshot = window.render_game_to_text = () => !this.roaming && this.step.scene !== this.place ? 'null' : JSON.stringify({
       ...this.position, scene: this.place, district: this.district, chapter: this.quest.state.chapter,
-      objective: this.step.id, speaker: this.conversation.current?.speaker, flags: this.quest.state.flags,
-      choices: this.quest.state.choices, identity: this.player.identity, busy: this.busy,
+      objective: this.roaming ? 'free-roam' : this.step.id, speaker: this.conversation.current?.speaker, flags: this.quest.state.flags,
+      field: this.quest.state.field, choices: this.quest.state.choices, identity: this.player.identity, busy: this.busy,
       audio: audio.state, muted: audio.muted, fps: Math.round(this.game.loop.actualFps), displayObjects: this.children.length,
       suspicion: this.stealth?.suspicion, retries: this.stealth?.tries, tailReady: this.stealth?.complete
     });
-    window.randuTest = {
+    this.debugDriver = window.randuTest = {
       place: id => this.player.place(this.mark(id)),
+      fieldPlace: id => {
+        const site = discoveries.find(entry => entry.scene === this.place && entry.id === id);
+        if (site) this.player.place(site.at);
+        const [activityId, stage] = id.split(':');
+        const activity = activities.find(entry => entry.id === activityId);
+        if (activity && this.place === 'Town' && (stage === 'lead' || stage === 'comparison')) this.player.place(activity[stage].at);
+      },
       expose: enabled => { this.exposeForTest = enabled; },
       advance: () => {
         if (!this.conversation.active) return false;

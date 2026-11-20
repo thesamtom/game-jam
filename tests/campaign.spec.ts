@@ -30,6 +30,8 @@ test('all nine chapters, checkpoint reload, scripted identity change, and credit
   await page.getByRole('button', { name: 'Continue' }).click();
   await at(page, 'van');
   expect((await state(page)).choices.pressure).toBe('quiet');
+  expect((await state(page)).field.trust).toBeGreaterThan(30);
+  expect((await state(page)).field.rank).toBe('Street Insider');
   await talk('van');
   await expect(page.locator('.dialogue')).toContainText('Vishnu');
   await drain(page);
@@ -76,6 +78,11 @@ test('all nine chapters, checkpoint reload, scripted identity change, and credit
   await talk('home');
   await expect(page.getByText('The End', { exact: true })).toBeVisible();
   await expect(page.getByText('Kenney · Tiny City · CC0')).toBeVisible();
+  await page.getByRole('button', { name: 'Explore Karimkunnu' }).click();
+  await at(page, 'free-roam');
+  expect((await state(page)).identity).toBe('Vishnu');
+  expect((await state(page)).field.achievements).toEqual(expect.arrayContaining(['assignment', 'trusted', 'witness', 'twospies']));
+  await page.keyboard.press('Escape');
   await page.getByRole('button', { name: 'Return to title' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByText('The End', { exact: true })).toBeVisible();

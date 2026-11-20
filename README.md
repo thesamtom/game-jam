@@ -21,8 +21,18 @@ Open **http://127.0.0.1:5188**. New Game starts the story. Continue loads the la
 | Choose a response | Click, or focus with Tab and confirm with Enter | Tap the response |
 | Pause during exploration | Escape | Pause button |
 | Mute | M | Sound button |
+| Case File | J | Case File button |
 
 The arrow in the objective tracker points toward the current destination. Look for the amber marker when close. In stealth, solid cover breaks sight, and prolonged exposure restores a checkpoint.
+
+## Explore Karimkunnu
+
+Teal marks indicate optional landmarks, evidence, observation points, and investigation leads. Small amber marks indicate hidden envelopes. The Case File tracks explored districts, available leads, evidence, character notes, achievements, XP, and reputation. Its Records tab also controls field notifications.
+
+- Eleven optional investigations ask you to compare two pieces of evidence and choose a supported explanation.
+- Five replayable challenges span Shadow, Observation, Escape and Deduction. Completed challenges can be replayed from the Case File or **Challenge Records** on the title screen. Personal bests are local to the browser. Replays update the leaderboard separately from the campaign.
+- Town conditions follow the story. Revisit districts after major events and use the openings in the yard fence and the tower lane to approach from a different direction. The park is open during free exploration. The rooftop can be revisited after its first story encounter, and **Explore Karimkunnu** on the end screen returns to town after the credits.
+- Existing version 1 saves migrate at Continue. The expansion preserves the story checkpoint and credits completed objectives toward rank. Optional activities are independent of the nine-chapter path.
 
 ## Build and verify
 

@@ -34,5 +34,12 @@ test('touch movement, dialogue, pause, mute, and reload work in mobile WebKit', 
   await page.getByRole('button', { name: 'Continue' }).tap();
   await at(page, 'briefing');
   await expect(page.getByRole('button', { name: 'Unmute' })).toBeVisible();
+  await page.getByRole('button', { name: 'Case File' }).tap();
+  await expect(page.getByRole('heading', { name: 'Case File' })).toBeVisible();
+  await page.getByRole('button', { name: 'Leads', exact: true }).tap();
+  await expect(page.getByRole('heading', { name: 'Discovered Clues' })).toBeVisible();
+  await page.screenshot({ path: '.qa/expanded-case-mobile.png' });
+  await page.getByRole('button', { name: 'Close', exact: true }).tap();
+  await expect(page.getByRole('button', { name: 'Move right' })).toBeVisible();
   expect(faults).toEqual([]);
 });

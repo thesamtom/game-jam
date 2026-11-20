@@ -6,6 +6,8 @@ import { TownScene } from './scenes/TownScene';
 import { RoofScene } from './scenes/RoofScene';
 import { UIScene } from './scenes/UIScene';
 import { ParkScene } from './scenes/ParkScene';
+import { FieldParkScene, FieldRoofScene } from './scenes/FieldDestinations';
+import { ChallengeScene } from './scenes/ChallengeScene';
 import { CreditsScene } from './scenes/CreditsScene';
 import './style.css';
 
@@ -14,5 +16,5 @@ new Phaser.Game({
   pixelArt: true, roundPixels: true,
   scale: { mode: Phaser.Scale.RESIZE, width: window.innerWidth, height: window.innerHeight },
   physics: { default: 'arcade', arcade: { debug: false } },
-  scene: [BootScene, TileDebugScene, TitleScene, TownScene, RoofScene, ParkScene, UIScene, CreditsScene]
+  scene: [BootScene, TileDebugScene, TitleScene, TownScene, RoofScene, ParkScene, UIScene, CreditsScene, ChallengeScene, FieldParkScene, FieldRoofScene]
 });

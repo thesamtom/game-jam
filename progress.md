@@ -49,3 +49,20 @@ Average **1.9 / 3**. The repeated objective marker is a visual limitation under 
 ## Remaining limitations
 
 Mobile coverage consisted of an emulated iPhone viewport in Playwright WebKit. Vite reports a large Phaser-heavy chunk of roughly 342 kB gzipped. All nine required story chapters are implemented.
+
+## Open-world expansion
+
+The expansion request extends exploration and optional play while preserving the existing campaign. It uses the existing Phaser Canvas renderer, physics, input, dialogue and stealth systems. All art comes from the supplied Kenney pack or code-drawn graphics.
+
+| Phase | Implemented and exercised |
+| --- | --- |
+| A · Exploration | District progress and local discoveries persist without moving the main checkpoint. Browser testing opened a landmark and restored it through Continue. |
+| B · Progression | Story and field XP, five ranks, Gang Trust and Police Suspicion, and aggregated notifications. The campaign and stealth retry tests passed with progression enabled. |
+| C · Investigation | The Case File, fourteen achievements, and eleven two-part investigations. Browser coverage includes correction after a wrong answer, notification settings, and mobile Case File navigation. |
+| D · Challenges | Seven seeded envelopes and five challenges across four categories. Tested discovery and repeat prevention, challenge completion, failure and retry, scoring, and isolation of campaign data during replay. |
+| E · Reactive town | Five chapter-linked town conditions, revised patrols, signs, lighting and local time. Park and rooftop detours reuse the existing maps. The ending unlocks free exploration as Vishnu. |
+| F · Regression | Real version 1 rooftop migration, full nine-chapter progression with optional activities skipped, mobile WebKit interaction, and all eleven investigations solved in one save. The earned trust threshold opened the market challenge. |
+
+Strict TypeScript, the Vite production build, all 24 development tests and the production-preview test passed. Desktop Chromium and emulated iPhone WebKit were used. The desktop Case File and mobile Case File captures were visually checked. The bundled web-game client also verified movement and a nonblank Canvas. The sampled desktop run reported 197 display objects and 48 FPS. The production bundle is about 358 kB gzipped.
+
+Use **J** or the Case File button for leads and progress. Use **Challenge Records** on the title screen for local replays. **Explore Karimkunnu** appears after the ending.

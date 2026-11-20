@@ -60,7 +60,7 @@ export function renderWorld(scene: Phaser.Scene, layout: Layout) {
     scene.add.text(sign.x * 16, sign.y * 16, sign.text, {
       fontFamily: '"Noto Sans Malayalam", system-ui, sans-serif', fontSize: '6px', resolution: 2, fontStyle: 'bold',
       color: sign.color, backgroundColor: '#253139', padding: { x: 2, y: 1 }
-    }).setOrigin(.5).setDepth(5000);
+    }).setOrigin(.5).setDepth(5000).setName('street-sign').setData('streetLabel', sign.text);
   }
   const obstacles = scene.physics.add.staticGroup();
   for (const { x, y, w, h } of layout.solids) {
@@ -72,17 +72,31 @@ export function renderWorld(scene: Phaser.Scene, layout: Layout) {
   return obstacles;
 }
 
-function renderLampPools(scene: Phaser.Scene, layout: Layout) {
-  if (!scene.textures.exists('lamplight')) {
-    const texture = scene.textures.createCanvas('lamplight', 70, 70)!;
+function lightTexture(scene: Phaser.Scene, color: string) {
+  const key = 'lamplight:' + color;
+  if (!scene.textures.exists(key)) {
+    const texture = scene.textures.createCanvas(key, 70, 70)!;
     const ctx = texture.context;
     const light = ctx.createRadialGradient(35, 35, 1, 35, 35, 34);
-    light.addColorStop(0, 'rgba(250, 201, 115, .24)');
-    light.addColorStop(.45, 'rgba(250, 190, 101, .12)');
-    light.addColorStop(1, 'rgba(244, 169, 100, 0)');
+    light.addColorStop(0, color + '59');
+    light.addColorStop(.45, color + '30');
+    light.addColorStop(1, color + '00');
     ctx.fillStyle = light;
     ctx.fillRect(0, 0, 70, 70);
     texture.refresh();
   }
-  for (const lamp of layout.lamps) scene.add.image(lamp.x, lamp.y + 13, 'lamplight').setDepth(-51);
+  return key;
+}
+
+function renderLampPools(scene: Phaser.Scene, layout: Layout) {
+  const key = lightTexture(scene, '#ebbb72');
+  for (const lamp of layout.lamps) scene.add.image(lamp.x, lamp.y + 13, key).setDepth(-51).setName('street-lamp');
+}
+
+export function dressWorld(scene: Phaser.Scene, lamp: string, yard: string) {
+  const glow = lightTexture(scene, lamp);
+  for (const child of scene.children.list) {
+    if (child.name === 'street-lamp') (child as Phaser.GameObjects.Image).setTexture(glow);
+    if (child.name === 'street-sign' && child.getData('streetLabel') === 'GOODS YARD') (child as Phaser.GameObjects.Text).setText(yard);
+  }
 }

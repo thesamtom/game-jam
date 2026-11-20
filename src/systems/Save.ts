@@ -1,11 +1,14 @@
 import { chapters, type Place } from '../data/chapters';
 import { maps } from '../data/maps';
 import type { Point } from '../data/maps/layout';
+import { TownStateManager } from './TownStateManager';
+import { backfillProgress, currentRank } from './ProgressionManager';
+import { readFieldRecord } from './FieldRecord';
 import { newCampaign, type Campaign } from './QuestManager';
 
 const KEY = 'randu-chaaran:campaign';
 const MUTE = 'randu-chaaran:muted';
-const VERSION = 1;
+const VERSION = 2;
 interface SaveRecord {
   version: number;
   scene: Place;
@@ -31,7 +34,8 @@ export function safePosition(scene: Place, point: unknown): point is Point {
     y > b.y * 16 - 4 && y < (b.y + b.h) * 16 + 4);
 }
 
-export function saveCampaign(campaign: Campaign, finished = false) {
+export function saveCampaign(campaign: Campaign, finished = campaign.flags.includes('home')) {
+  new TownStateManager(campaign).sync();
   const scene = chapters[campaign.chapter - 1].objectives[campaign.objective].scene;
   const record: SaveRecord = { version: VERSION, scene, campaign, finished, muted: mutedPreference() };
   writable(KEY, JSON.stringify(record));
@@ -43,7 +47,7 @@ export function loadCampaign(): SaveRecord | null {
     if (!raw) return null;
     const saved = JSON.parse(raw) as Partial<SaveRecord>;
     const campaign = saved.campaign;
-    if (saved.version !== VERSION || !campaign || !Number.isInteger(campaign.chapter) || !Number.isInteger(campaign.objective)
+    if ((saved.version !== 1 && saved.version !== VERSION) || !campaign || !Number.isInteger(campaign.chapter) || !Number.isInteger(campaign.objective)
       || !Array.isArray(campaign.flags) || typeof campaign.choices !== 'object' || !campaign.choices) return null;
     const chapter = chapters[campaign.chapter - 1];
     const step = chapter?.objectives[campaign.objective];
@@ -60,9 +64,13 @@ export function loadCampaign(): SaveRecord | null {
     if (campaign.identity !== requiredIdentity) return null;
     const choices: Record<string, string> = {};
     if (campaign.choices.pressure === 'firm' || campaign.choices.pressure === 'quiet') choices.pressure = campaign.choices.pressure;
+    const field = readFieldRecord(campaign.field);
+    if (saved.version === 1) backfillProgress(field, campaign.flags, choices);
+    field.rank = currentRank(field.xp).name;
+    new TownStateManager({ ...campaign, field }).sync();
     return {
       version: VERSION, scene: step.scene, finished, muted: typeof saved.muted === 'boolean' ? saved.muted : mutedPreference(),
-      campaign: { ...campaign, choices, position: safePosition(step.scene, campaign.position) ? campaign.position : undefined }
+      campaign: { ...campaign, choices, field, position: safePosition(step.scene, campaign.position) ? campaign.position : undefined }
     };
   } catch { return null; }
 }

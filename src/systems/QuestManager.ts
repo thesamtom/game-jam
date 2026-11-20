@@ -1,5 +1,6 @@
 import { chapters } from '../data/chapters';
 import type { Point } from '../data/maps/layout';
+import { newFieldRecord, type FieldRecord } from './FieldRecord';
 import type { Identity } from '../entities/Player';
 
 export interface Campaign {
@@ -9,9 +10,10 @@ export interface Campaign {
   choices: Record<string, string>;
   position?: Point;
   identity: Identity;
+  field: FieldRecord;
 }
 export function newCampaign(chapter = 1, objective = 0): Campaign {
-  return { chapter, objective, flags: [], choices: {}, identity: chapter === 9 ? 'Vishnu' : 'Alex' };
+  return { chapter, objective, flags: [], choices: {}, field: newFieldRecord(), identity: chapter === 9 ? 'Vishnu' : 'Alex' };
 }
 
 export class QuestManager {

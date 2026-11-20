@@ -65,8 +65,10 @@ for (const x of [20, 26]) for (let y = 18; y < 22; y++) {
 }
 for (const x of [28, 35, 38, 41, 44]) stamp(town, x, 24, STAMP.fence, box(x, 24.75, 3, 0.25));
 for (const x of [28, 31, 34, 37, 40, 43]) stamp(town, x, 36, STAMP.fence, box(x, 36.73, 3, 0.27));
-town.solids.push(box(45.85, 25, .55, 11), box(27.5, 25, .45, 4), box(27.5, 33, .45, 3.7));
-patch(town, 45.85, 25, .55, 11, '#545651');
+town.solids.push(box(45.85, 25, .55, 5.3), box(45.85, 32.6, .55, 3.4), box(27.5, 25, .45, 4), box(27.5, 33, .45, 3.7));
+patch(town, 45.85, 25, .55, 5.3, '#545651');
+patch(town, 45.85, 32.6, .55, 3.4, '#545651');
+patch(town, 44.7, 30.45, 3.05, 2.08, '#817d65', '#908970');
 patch(town, 27.5, 25, .45, 4, '#545651');
 patch(town, 27.5, 33, .45, 3.7, '#545651');
 town.signs.push({ x: 34, y: 24.4, text: 'GOODS YARD', color: '#e7c58c' },
@@ -108,5 +110,5 @@ town.marks = {
   raidStart: cell(29.4, 25.7), raidRendezvous: cell(37.6, 28.5), raidExit: cell(26.5, 32),
   safeCover: cell(36, 30.5),
   evidence: cell(7, 9.7), clinic: cell(16, 9.5), home: cell(8, 16.2),
-  homeStart: cell(23, 35.5)
+  homeStart: cell(23, 35.5), parkPath: cell(24.1, 36.5), roofVisit: cell(12.6, 32.1)
 };
