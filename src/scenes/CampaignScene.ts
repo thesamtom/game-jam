@@ -138,7 +138,7 @@ export class CampaignScene extends Phaser.Scene {
     this.npcs.push(actor);
     return actor;
   }
-  protected beginObjective(initial = false) {
+  protected beginObjective(initial = false, announce = initial && this.quest.state.objective === 0) {
     for (const actor of this.npcs) actor.destroy();
     this.npcs = [];
     const step = this.step;
@@ -156,7 +156,19 @@ export class CampaignScene extends Phaser.Scene {
     this.presentObjective();
     this.quest.state.position = safePosition(this.place, this.position) ? this.position : undefined;
     saveCampaign(this.quest.state);
-    if (step.mode === 'auto') this.time.delayedCall(80, () => void this.activate(step));
+    const begin = () => {
+      if (step.mode === 'auto') this.time.delayedCall(80, () => void this.activate(step));
+    };
+    if (announce) {
+      this.busy = true;
+      this.player.stop();
+      this.controls.clear();
+      this.hud.showChapterIntro(this.quest.chapter, () => {
+        this.controls.clear();
+        this.busy = false;
+        begin();
+      });
+    } else begin();
   }
   private refreshTown() {
     this.townState.sync();
@@ -407,8 +419,7 @@ export class CampaignScene extends Phaser.Scene {
       return;
     }
     if (result === 'chapter') this.field.progression.reputation(0, -6, 'The town’s attention moved on');
-    if (result === 'chapter') this.hud.setDistrict(`CHAPTER ${this.quest.chapter.id} — ${this.quest.chapter.title.toUpperCase()}`);
-    this.beginObjective();
+    this.beginObjective(false, result === 'chapter');
   }
   protected speak(id: DialogueId): Promise<void> {
     if (!this.sys.isActive()) return Promise.resolve();

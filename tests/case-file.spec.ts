@@ -9,7 +9,9 @@ test('optional investigation records evidence, accepts a correction and updates 
   await page.keyboard.press('j');
   await expect(page.getByRole('heading', { name: 'Case File' })).toBeVisible();
   await page.getByRole('button', { name: 'People', exact: true }).click();
-  await expect(page.getByText('Profiles unlock as the story develops.')).toBeVisible();
+  await expect(page.locator('.character-card')).toHaveCount(8);
+  await expect(page.getByRole('heading', { name: 'Sudhi', exact: true })).toBeVisible();
+  await expect(page.getByText('A quiet police officer.', { exact: true })).toBeVisible();
   await page.keyboard.press('Escape');
   await visit('lead');
   await expect(page.getByText('Optional investigation · Lead recorded')).toBeVisible();

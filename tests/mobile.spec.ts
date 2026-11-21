@@ -3,6 +3,23 @@ import { at, start, state } from './helpers';
 
 test.use({ ...devices['iPhone 13'], browserName: 'webkit' });
 
+test('mobile players can read all eight introductions and start the chapter', async ({ page }) => {
+  await page.goto('/?fast');
+  await page.getByRole('button', { name: 'New Game' }).tap();
+  const roster = page.getByRole('dialog', { name: 'MEET THE PEOPLE OF KARIMKUNNU' });
+  const begin = roster.getByRole('button', { name: 'Begin Story' });
+  await expect(begin).toBeInViewport();
+  await expect(roster.locator('.character-card')).toHaveCount(8);
+  await roster.locator('.character-grid').evaluate(grid => { grid.scrollTop = grid.scrollHeight; });
+  await expect(roster.getByRole('heading', { name: 'Sudhi', exact: true })).toBeInViewport();
+  await expect(begin).toBeInViewport();
+  await page.screenshot({ path: '.qa/story-introductions-mobile.png' });
+  await begin.tap();
+  await expect(page.getByRole('dialog', { name: 'Chapter 1 — Two Spies' })).toBeVisible();
+  await page.getByRole('button', { name: 'Start Chapter' }).tap();
+  await at(page, 'briefing');
+});
+
 test('touch movement, dialogue, pause, mute, and reload work in mobile WebKit', async ({ page }) => {
   const faults: string[] = [];
   page.on('pageerror', error => faults.push(error.message));

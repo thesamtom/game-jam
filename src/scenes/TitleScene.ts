@@ -5,6 +5,7 @@ import { newCampaign, type Campaign } from '../systems/QuestManager';
 import { debugCampaign, loadCampaign, saveCampaign } from '../systems/Save';
 import { button, interfaceRoot } from './UIScene';
 import { renderWorld } from './WorldView';
+import { characterCards, characterPortrait } from './CharacterProfiles';
 import { Npc } from '../entities/Npc';
 import { renderChallengeBoard } from './ChallengeBoard';
 import type { ChallengeLaunch } from './ChallengeScene';
@@ -41,8 +42,37 @@ export class TitleScene extends Phaser.Scene {
       const step = chapter ? Phaser.Math.Clamp(Math.floor(Number(params.get('step'))) || 0, 0, chapter.objectives.length - 1) : 0;
       const state = sample ? debugCampaign(2, 2) : chapter ? debugCampaign(chapter.id, step) : newCampaign();
       if (sample) state.position = town.marks.shopkeeper;
-      saveCampaign(state);
-      open(state);
+      const roster = document.createElement('section');
+      roster.className = 'story-overlay roster-screen';
+      roster.setAttribute('role', 'dialog');
+      roster.setAttribute('aria-modal', 'true');
+      roster.setAttribute('aria-labelledby', 'karimkunnu-roster');
+      const panel = document.createElement('div');
+      panel.className = 'story-panel';
+      const title = document.createElement('h2');
+      title.id = 'karimkunnu-roster';
+      title.textContent = 'MEET THE PEOPLE OF KARIMKUNNU';
+      const cards = characterCards(id => characterPortrait(this, id));
+      const begin = button('Begin Story', () => {
+        begin.disabled = true;
+        saveCampaign(state);
+        open(state);
+      }, 'menu-button primary');
+      const actions = document.createElement('div');
+      actions.className = 'story-actions';
+      const back = button('Back to title', () => {
+        roster.remove();
+        poster.hidden = false;
+        nav.querySelector('button')?.focus();
+      }, 'menu-button');
+      actions.append(back, begin);
+      panel.append(title, cards, actions);
+      roster.append(panel);
+      poster.hidden = true;
+      interfaceRoot().append(roster);
+      this.events.once('shutdown', () => roster.remove());
+      title.tabIndex = -1;
+      title.focus();
     };
     const continueButton = button('Continue', () => {
       if (!saved) return;

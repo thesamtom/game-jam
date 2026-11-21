@@ -5,6 +5,7 @@ import { activities, activityStatus, type Activity } from '../data/activities';
 import { checkAchievements } from '../systems/Achievements';
 import { RewardManager } from '../systems/RewardManager';
 import { renderChallengeBoard } from './ChallengeBoard';
+import { characterPortrait } from './CharacterProfiles';
 import { renderCaseFile, element } from './CaseFile';
 import type { Point } from '../data/maps/layout';
 import type { Campaign } from '../systems/QuestManager';
@@ -26,7 +27,7 @@ export class FieldView {
   private opened = false;
   readonly progression: ProgressionManager;
   readonly notices: FieldNotices;
-  constructor(scene: Phaser.Scene, private readonly place: Place, private readonly campaign: Campaign,
+  constructor(private readonly scene: Phaser.Scene, private readonly place: Place, private readonly campaign: Campaign,
     private readonly root: HTMLElement, private readonly save: () => void, private readonly stop: () => void,
     private readonly challenge: (id: string) => void) {
     this.manager = new ExplorationManager(campaign, place);
@@ -125,7 +126,7 @@ export class FieldView {
   openFile() {
     this.show('Case File', '', '');
     this.panel.classList.add('case-file');
-    renderCaseFile(this.panel, this.campaign, 'Briefing', () => this.close(), () => {
+    renderCaseFile(this.panel, this.campaign, 'Briefing', id => characterPortrait(this.scene, id), () => this.close(), () => {
       this.campaign.field.quiet = !this.campaign.field.quiet;
       this.notices.clear();
       this.persist();

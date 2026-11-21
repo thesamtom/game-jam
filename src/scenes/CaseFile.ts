@@ -8,20 +8,13 @@ import { districtId, districtNames } from '../systems/ExplorationManager';
 import { currentRank, ranks } from '../systems/ProgressionManager';
 import type { Campaign } from '../systems/QuestManager';
 import { rewards } from '../systems/RewardManager';
+import type { Character } from '../entities/Npc';
+import { characterCards } from './CharacterProfiles';
 import { button } from './UIScene';
 
 const tabs = ['Briefing', 'Leads', 'People', 'Records'] as const;
 type Tab = typeof tabs[number];
-const profiles = [
-  ['Alex', 'briefing', 'Undercover operative. Raghavan is his sole police contact.', 'evidence', 'Vishnu was the source Alex had been tracking.'],
-  ['SP Raghavan', 'briefing', 'Alex’s commanding officer and handler.', 'meet', 'His death leaves Alex without official protection.'],
-  ['CI Hamsa', 'briefing', 'An investigator who keeps his own copies of the paperwork.', 'raid', 'The raid went ahead while he was suspended.'],
-  ['Shaji', 'orders', 'Handles Kuttappan’s errands and watches new arrivals.', 'injured', 'He recognized Alex as the informer.'],
-  ['Kuttappan', 'accepted', 'Controls the market and raised Vishnu.', 'survive', 'His final encounter with Vishnu took place at the goods yard.'],
-  ['Vishnu', 'briefing', 'A police officer raised by Kuttappan.', 'evidence', 'He leaked police information to the gang.'],
-  ['Dr. Meera', 'clinic', 'The psychiatrist Alex trusted with the evidence.', 'goodbye', 'She left after reading the papers.'],
-  ['Sudhi', 'arrest', 'A second gang infiltrator inside the force.', '', '']
-] as const;
+
 
 export function element<K extends keyof HTMLElementTagNameMap>(tag: K, text: string, className?: string) {
   const node = document.createElement(tag);
@@ -30,9 +23,9 @@ export function element<K extends keyof HTMLElementTagNameMap>(tag: K, text: str
   return node;
 }
 
-export function renderCaseFile(panel: HTMLElement, campaign: Campaign, selected: Tab, close: () => void,
+export function renderCaseFile(panel: HTMLElement, campaign: Campaign, selected: Tab, portrait: (id: Character) => string, close: () => void,
   quiet: () => void, renderExtras?: (tab: Tab, body: HTMLElement) => void) {
-  const render = (tab: Tab) => renderCaseFile(panel, campaign, tab, close, quiet, renderExtras);
+  const render = (tab: Tab) => renderCaseFile(panel, campaign, tab, portrait, close, quiet, renderExtras);
   const rank = currentRank(campaign.field.xp);
   const header = document.createElement('header');
   const hasSeal = Object.values(campaign.field.envelopes).includes('copper-seal');
@@ -59,7 +52,7 @@ export function renderCaseFile(panel: HTMLElement, campaign: Campaign, selected:
     heading('Main Story');
     for (const chapter of chapters.slice(0, campaign.chapter)) {
       const complete = chapter.completionConditions.every(flag => campaign.flags.includes(flag));
-      row('Chapter ' + chapter.id + ' · ' + chapter.title, complete ? 'Completed' : chapter.description);
+      row('Chapter ' + chapter.id + ' · ' + chapter.title, complete ? 'Completed. ' + chapter.description : chapter.description);
     }
     heading('Current Objectives');
     const chapter = chapters[campaign.chapter - 1];
@@ -106,11 +99,8 @@ export function renderCaseFile(panel: HTMLElement, campaign: Campaign, selected:
     }
     renderExtras?.(selected, body);
   } else if (selected === 'People') {
-    heading('Character Profiles');
-    for (const [name, flag, note, updateFlag, update] of profiles) {
-      if (campaign.flags.includes(flag)) row(name, note + (campaign.flags.includes(updateFlag) ? ' ' + update : ''));
-    }
-    if (!campaign.flags.includes('briefing')) row('Profiles unlock as the story develops.', '');
+    heading('Character Dossier');
+    body.append(characterCards(portrait, campaign.flags));
   } else {
     heading('Undercover Rank');
     const next = ranks.find(item => item.xp > field.xp);

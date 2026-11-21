@@ -11,7 +11,7 @@ npm ci
 npm run dev
 ```
 
-Open **http://127.0.0.1:5188**. New Game starts the story. Continue loads the last completed objective’s checkpoint. Browser storage is local to the origin and browser profile.
+Open **http://127.0.0.1:5188**. New Game opens the character introductions. Select **Begin Story**, then read the Chapter 1 briefing and choose **Start Chapter**. Continue loads the last completed objective’s checkpoint. Browser storage is local to the origin and browser profile.
 
 | Action | Desktop | Touch |
 | --- | --- | --- |
@@ -27,7 +27,7 @@ The arrow in the objective tracker points toward the current destination. Look f
 
 ## Explore Karimkunnu
 
-Teal marks indicate optional landmarks, evidence, observation points, and investigation leads. Small amber marks indicate hidden envelopes. The Case File tracks explored districts, available leads, evidence, character notes, achievements, XP, and reputation. Its Records tab also controls field notifications.
+Teal marks indicate optional landmarks, evidence, observation points, and investigation leads. Small amber marks indicate hidden envelopes. The Case File tracks explored districts, available leads, evidence, character notes, achievements, XP, and reputation. Its People tab shows all eight characters and adds what you’ve learned about them. Its Records tab also controls field notifications.
 
 - Eleven optional investigations ask you to compare two pieces of evidence and choose a supported explanation.
 - Five replayable challenges span Shadow, Observation, Escape and Deduction. Completed challenges can be replayed from the Case File or **Challenge Records** on the title screen. Personal bests are local to the browser. Replays update the leaderboard separately from the campaign.

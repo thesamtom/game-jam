@@ -1,11 +1,16 @@
 import { expect, test } from '@playwright/test';
-import { at, drain, go, start, state } from './helpers';
+import { at, beginGame, drain, go, start, state } from './helpers';
 
 test('all nine chapters, checkpoint reload, scripted identity change, and credits', async ({ page }) => {
   test.setTimeout(45000);
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', event => { if (event.type() === 'error') errors.push(event.text()); });
+  await page.addInitScript(() => document.addEventListener('click', event => {
+    const button = event.target instanceof Element ? event.target.closest('.chapter-intro button') : null;
+    const id = button?.closest<HTMLElement>('.chapter-intro')?.dataset.chapter;
+    if (id) sessionStorage.setItem('chapters-seen', (sessionStorage.getItem('chapters-seen') ?? '') + id);
+  }, true));
   await start(page, '?fast');
   await at(page, 'briefing');
   await talk('raghavan');
@@ -66,6 +71,10 @@ test('all nine chapters, checkpoint reload, scripted identity change, and credit
   await drain(page);
   await at(page, 'roofExit');
   expect((await state(page)).identity).toBe('Vishnu');
+  await page.keyboard.press('j');
+  await page.getByRole('button', { name: 'People', exact: true }).click();
+  await expect(page.locator('.character-card').filter({ has: page.getByRole('heading', { name: 'Sudhi', exact: true }) }))
+    .toContainText('He also worked for Kuttappan.');
   await page.reload();
   await page.getByRole('button', { name: 'Continue' }).click();
   await at(page, 'roofExit');
@@ -86,6 +95,7 @@ test('all nine chapters, checkpoint reload, scripted identity change, and credit
   await page.getByRole('button', { name: 'Return to title' }).click();
   await page.getByRole('button', { name: 'Continue' }).click();
   await expect(page.getByText('The End', { exact: true })).toBeVisible();
+  expect(await page.evaluate(() => sessionStorage.getItem('chapters-seen'))).toBe('123456789');
   expect(errors).toEqual([]);
 
   async function talk(mark: string) {
@@ -105,6 +115,6 @@ test('corrupted save disables Continue and permits a fresh game', async ({ page 
   await page.addInitScript(() => localStorage.setItem('randu-chaaran:campaign', '{"version":1,"scene":"Roof"}'));
   await page.goto('/?fast');
   await expect(page.getByRole('button', { name: 'Continue' })).toBeDisabled();
-  await page.getByRole('button', { name: 'New Game' }).click();
+  await beginGame(page);
   await at(page, 'briefing');
 });

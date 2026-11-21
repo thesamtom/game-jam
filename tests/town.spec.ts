@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { beginGame } from './helpers';
 test('town camera, movement, and building collision', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   await page.goto('/?fast');
-  await page.getByRole('button', { name: 'New Game' }).click();
+  await beginGame(page);
   const state = () => page.evaluate(() => JSON.parse(window.render_game_to_text!()));
   await expect.poll(async () => (await state()).district).toBe('POLICE QUARTER');
   await expect.poll(async () => (await state()).objective).toBe('briefing');

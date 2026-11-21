@@ -11,8 +11,11 @@ test('built browser game loads local assets and omits development hooks', async 
   await expect(page.locator('canvas')).toBeVisible();
   await page.screenshot({ path: '.qa/title-production.png' });
   await page.getByRole('button', { name: 'New Game' }).click();
-  await expect(page.getByText('CHAPTER 1 — TWO SPIES', { exact: true })).toBeVisible();
-  await expect(page.locator('.objective strong')).toHaveText('Talk to SP Raghavan', { timeout: 8000 });
+  await expect(page.getByRole('heading', { name: 'MEET THE PEOPLE OF KARIMKUNNU' })).toBeVisible();
+  await page.getByRole('button', { name: 'Begin Story' }).click();
+  await expect(page.getByRole('heading', { name: 'Chapter 1 — Two Spies' })).toBeVisible();
+  await page.getByRole('button', { name: 'Start Chapter' }).click();
+  await expect(page.locator('.objective strong')).toContainText('Meet SP Raghavan', { timeout: 8000 });
   await page.keyboard.press('e');
   await expect(page.locator('.dialogue')).toBeVisible();
   await page.keyboard.press('Space');

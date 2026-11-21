@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { beginGame } from './helpers';
 test('proximity dialogue reveals text and commits a choice', async ({ page }) => {
   const errors: string[] = [];
   page.on('pageerror', error => errors.push(error.message));
   page.on('console', message => { if (message.type() === 'error') errors.push(message.text()); });
   await page.goto('/?interaction');
-  await page.getByRole('button', { name: 'New Game' }).click();
+  await beginGame(page);
   await expect(page.getByRole('button', { name: /Call through the door/ })).toBeVisible();
   await page.keyboard.press('e');
   await expect(page.getByText('Shopkeeper', { exact: true })).toBeVisible();

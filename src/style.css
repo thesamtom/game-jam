@@ -81,6 +81,29 @@ body { color: #f5ecd7; font-family: var(--game-font); font-synthesis: none; line
 .field-panel p { line-height: 1.5; }
 .field-open .touch { visibility: hidden; }
 .game-ui:has(.case-file:not([hidden])) :is(.objective, .utility, .district, .suspicion, .field-notice) { visibility: hidden; }
+.story-overlay { position: absolute; z-index: 10; inset: 0; display: grid; grid-template-rows: minmax(0, 1fr); place-items: center; padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left)); background: #0d181ded; pointer-events: auto; }
+.story-panel { display: flex; flex-direction: column; width: min(900px, 100%); max-height: 100%; min-height: 0; padding: clamp(16px, 3vw, 32px); background: #14252bf9; border: 1px solid #8b8c6d; box-shadow: 0 14px 38px #070e15b0; overflow: auto; }
+.story-panel h2 { margin: 0 0 16px; color: #f0d4a7; font-size: 30px; line-height: 1.1; font-weight: 400; }
+.story-panel h2:focus { outline: none; }
+.roster-screen .character-grid { overflow-y: auto; min-height: 0; padding: 2px 6px 2px 0; }
+.character-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-content: start; gap: 8px; }
+.character-grid .character-card { display: grid; grid-template-columns: 56px minmax(0, 1fr); column-gap: 12px; align-content: start; padding: 10px; border: 1px solid #415450; background: #1a3038; }
+.character-card img { grid-column: 1; grid-row: 1 / span 5; width: 48px; height: 48px; image-rendering: pixelated; align-self: center; }
+.character-grid .character-card h3 { grid-column: 2; font-size: 19px; letter-spacing: normal; margin: 0; color: #f0d4a7; }
+.character-grid .character-card p { grid-column: 2; color: #d7dfd3; margin: 3px 0 0; font-size: 15px; line-height: 1.4; }
+.character-role { grid-column: 2; color: #a2c7ba; font-size: 14px; }
+.story-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; margin-top: 16px; flex-shrink: 0; }
+.story-panel > .menu-button { align-self: end; margin-top: 16px; min-width: 140px; flex-shrink: 0; text-align: center; }
+.chapter-intro .story-panel { max-width: 610px; }
+.chapter-recap { margin: 0 0 16px; color: #d7dfd3; font-size: 19px; }
+.chapter-next { padding: 12px; margin: 0; border-left: 2px solid #d6a773; background: #1d343c; }
+.chapter-next .eyebrow { display: block; margin-bottom: 3px; }
+@media (max-width: 620px) {
+  .story-panel h2 { font-size: 24px; }
+  .character-grid { grid-template-columns: minmax(0, 1fr); }
+  .story-panel > .menu-button { width: 100%; }
+  .story-actions .menu-button { flex: 1; text-align: center; }
+}
 [hidden] { display: none !important; }
 button { font: inherit; color: inherit; cursor: pointer; }
 button:focus-visible { outline: 2px solid #f2c380; outline-offset: 4px; }

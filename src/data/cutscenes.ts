@@ -24,13 +24,13 @@ export async function enact(id: string, stage: Stage) {
   await fx.run(async () => {
     switch (id) {
       case 'opening':
-        await fx.caption('Karimkunnu. A town where everyone knows everyone. Except the people they really are.', 3700, true, 'CHAPTER 1 — TWO SPIES');
+        await fx.caption('Karimkunnu. A town where everyone knows everyone. Except the people they really are.', 3700, true);
         break;
       case 'childhood': {
         hide(['Raghavan', 'Hamsa']);
         setPlayer(false);
         fx.stage(true);
-        await fx.caption('Years earlier. Under the shop awning, in the rain.', 2350, true);
+        await fx.caption('Years earlier, Kuttappan took a boy named Vishnu in.', 2350, true);
         fx.stage(true);
         actor('Young Vishnu', position(-13, 5));
         actor('Kuttappan', position(14, 5));
@@ -52,7 +52,7 @@ export async function enact(id: string, stage: Stage) {
         actor('Shaji', position(28, 8));
         await fx.pan(focus, 400);
         await speak('warning');
-        await fx.caption('Two men received the same order. Find the traitor.', 3200, true);
+        await fx.caption('Alex is looking for the officer who warned the gang. Vishnu is looking for the gang member who tipped off the police.', 5800, true);
         setPlayer(true);
         break;
       case 'handoff': {
@@ -71,7 +71,7 @@ export async function enact(id: string, stage: Stage) {
         fx.sound('fall');
         await fx.fade(true);
         hide(['Raghavan', 'Kuttappan', 'Shaji']);
-        await fx.caption('The only man who knew the truth about Alex was gone.', 3250, true);
+        await fx.caption('Kuttappan’s crew pushed Raghavan off the roof. Alex lost the only person who could vouch for him.', 5100, true);
         break;
       }
       case 'raid': {
@@ -89,7 +89,7 @@ export async function enact(id: string, stage: Stage) {
         kuttappan.image.setAlpha(.4);
         await speak('father');
         fx.sound('impact');
-        await fx.caption('The yard went quiet. Alex stayed behind cover.', 2600, true);
+        await fx.caption('Vishnu shot Kuttappan. Alex stayed behind cover.', 2600, true);
         await fx.fade(false);
         break;
       }
@@ -110,21 +110,21 @@ export async function enact(id: string, stage: Stage) {
         await fx.fade(true, 290);
         fx.black(true);
         setPlayer(false);
-        await fx.caption('Sudhi fired.', 1400, true);
+        await fx.caption('Sudhi shot Alex.', 1400, true);
         fx.black(false);
         await fx.fade(false, 180);
         await shot();
         await fx.fade(true, 250);
         hide(['Vishnu', 'Sudhi']);
-        await fx.caption('Vishnu fired back. Sudhi fell silent.', 1700, true);
-        await fx.caption('Alex died before anyone could hear his account.', 2600, true);
+        await fx.caption('Vishnu shot Sudhi.', 1700, true);
+        await fx.caption('Alex died on the roof. You now play as Vishnu.', 2600, true);
         switchIdentity();
         setPlayer(true);
         await speak('coverup');
         await fx.fade(false, 400);
         break;
       case 'funeral':
-        await fx.caption('Alex was buried in Karimkunnu. There was no police salute.', 3100, true, 'CHAPTER 9 — THE ENDING');
+        await fx.caption('Alex was buried in Karimkunnu. There was no police salute.', 3100, true);
         await fx.caption('Meera stood until the others had gone.', 2300, true);
         break;
       case 'ending':

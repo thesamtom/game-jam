@@ -5,23 +5,23 @@ export interface Line { speaker: Character | 'Shopkeeper' | 'Unknown Officer' | 
 const line = (speaker: Line['speaker'], text: string, choices?: readonly Choice[]): Line => ({ speaker, text, choices });
 export const dialogue = {
   briefing: [
-    line('Raghavan', 'Three raids. Three empty rooms. Someone in the station is telling Kuttappan when we leave.'),
-    line('Alex', 'You want me inside his gang.'),
-    line('Raghavan', 'I want you to find the person keeping him safe. To everyone else, you’re a man looking for work.'),
+    line('Raghavan', 'Three raids. Three empty rooms. Someone in the police is warning Kuttappan before every raid.'),
+    line('Alex', 'You want me to join the gang and find the officer.'),
+    line('Raghavan', 'Exactly. Keep your badge hidden. Tell Shaji you’re looking for work.'),
     line('Hamsa', 'Saar, the yard file. Shall I wait outside?'),
     line('Raghavan', 'Leave it here, Hamsa. This gentleman was just going.'),
     line('Alex', 'If even he doesn’t know, who vouches for me?'),
-    line('Raghavan', 'I do. Until we know who is listening, that will have to be enough.')
+    line('Raghavan', 'I do. I’m the only one who knows you’re undercover.')
   ],
   beforeKuttappan: [
     line('Kuttappan', 'Come inside, mone. The step is dry. You can sit there as long as you like.')
   ],
   beforeUniform: [
-    line('Narrator', 'Years later, Vishnu wore a police uniform. Kuttappan had seen to that.'),
-    line('Vishnu', 'I know what I owe you, chetta. You don’t have to keep asking.')
+    line('Narrator', 'Kuttappan raised Vishnu. Years later, he helped him join the police.'),
+    line('Vishnu', 'I remember what you did for me, chetta.')
   ],
   errands: [
-    line('Shaji', 'Three things, aliyaa. Drop the parcel at the eastern step. Speak to the toddy shop. Pick up the cash by the west planter.'),
+    line('Shaji', 'Three jobs, aliyaa. Leave the parcel at the eastern step. Ask the toddy shop for our money. Pick up the cash by the west planter.'),
     line('Alex', 'What’s in the parcel?'),
     line('Shaji', 'Nothing you’re being paid to know.')
   ],
@@ -40,7 +40,7 @@ export const dialogue = {
     line('Kuttappan', 'Shaji says you listen before you speak. That will do.'),
     line('Alex', 'Does that mean you trust me?'),
     line('Kuttappan', 'Trust is easy, mone. Knowing when someone lies—that is the difficult part.'),
-    line('Kuttappan', 'Goods yard tonight. Come to the north gate. Shaji will tell you where to stand.')
+    line('Kuttappan', 'We have a deal at the goods yard tonight. Meet Shaji at the north gate.')
   ],
   message: [
     line('Alex', 'Goods Yard. North gate. 22:40. One van.'),
@@ -48,75 +48,75 @@ export const dialogue = {
   ],
   emptyVan: [
     line('Alex', 'No crates. No driver. The engine is still warm.'),
-    line('Raghavan', 'We were fast. Someone was faster. Find out who knew.')
+    line('Raghavan', 'Someone warned them. Alex, find the officer who leaked the plan.')
   ],
   warning: [
-    line('Vishnu', 'They moved the raid up. Leave the van, chetta. Take everything else.'),
-    line('Kuttappan', 'Only my own people knew about tonight. Shaji, find me the one who talked.'),
-    line('Vishnu', 'I’ll look from this side.')
+    line('Vishnu', 'The police are coming early, chetta. Empty the van and get everyone out.'),
+    line('Kuttappan', 'One of my people told the police. Vishnu, find out who gave them the tip.'),
+    line('Vishnu', 'I’ll check who’s been talking to the police.')
   ],
   handoff: [
-    line('Kuttappan', 'The names are in the envelope. Read them somewhere quiet.'),
+    line('Kuttappan', 'Take the envelope. It has the raid times and the payments.'),
     line('Unknown Officer', 'You were followed. Don’t turn around.'),
-    line('Alex', 'A police cap. That’s all I got.')
+    line('Alex', 'He’s a police officer, but I couldn’t see his face.')
   ],
   roofClue: [
     line('Narrator', 'A torn note lies beneath the curb. “Roof Tower. Same time. Come alone.”'),
-    line('Alex', 'If they found his meeting place, Raghavan needs to hear it from me.')
+    line('Alex', 'That’s where I meet Raghavan. I need to warn him.')
   ],
   raghavanRoof: [
-    line('Alex', 'Pull me out, saar. They know where we meet. You and I might both be exposed.'),
+    line('Alex', 'Pull me out, saar. The gang may know we meet up here.'),
     line('Raghavan', 'All right. No more calls. We’ll go straight to Hamsa.'),
     line('Shaji', 'Going somewhere?'),
-    line('Kuttappan', 'Raghavan. You should have told me there was a problem.')
+    line('Kuttappan', 'So you’re the one Alex has been meeting.')
   ],
   injured: [
     line('Shaji', 'I know you’re the informer.'),
     line('Alex', 'Can you stand?'),
-    line('Shaji', 'Don’t touch me, eda. Take the alley. Next time I see you, I’ll say it louder.')
+    line('Shaji', 'Take the alley, eda. Next time I see you, I’ll tell everyone.')
   ],
   raid: [
-    line('Vishnu', 'Hamsa is suspended. This raid is under my command. Hold the exits.'),
-    line('Kuttappan', 'You always called first. Even when you wore that uniform.'),
-    line('Vishnu', 'I asked you to leave town. You told me I’d come around.'),
+    line('Vishnu', 'Hamsa has been suspended. I’m leading the raid. Keep the exits covered.'),
+    line('Kuttappan', 'You used to warn me before every raid. What changed, mone?'),
+    line('Vishnu', 'I asked you to leave town. You should have listened.'),
     line('Kuttappan', 'I thought you would, mone.')
   ],
   father: [line('Kuttappan', 'I made you a policeman, mone. I never taught you how to stop being my son.')],
   proof: [
-    line('Alex', 'The envelope from the street. On Vishnu’s desk.'),
-    line('Narrator', 'Inside are raid times, payment amounts, and a note in Kuttappan’s hand. Vishnu’s name appears on every page.'),
-    line('Vishnu', 'Raghavan’s source file. Remove the last copy. There’s no officer left to reopen it.'),
-    line('Alex', 'Raghavan was the only one who could say why I was there.')
+    line('Alex', 'That’s the envelope Kuttappan handed to the officer. It’s on Vishnu’s desk.'),
+    line('Narrator', 'Alex finds raid times and payments from Kuttappan to Vishnu. Vishnu was the officer at the handoff.'),
+    line('Vishnu', 'Delete Raghavan’s file on his undercover officer. There’s nobody left to challenge it.'),
+    line('Alex', 'Without Raghavan or that file, I can’t prove I was working for the police.')
   ],
   clinic: [
-    line('Meera', 'You missed your session. Last time, you said you were afraid you’d forget which version of yourself to bring here.'),
-    line('Alex', 'I need you to keep this. Read it after I leave.'),
-    line('Meera', 'That’s Vishnu’s name. What are you asking me to believe?'),
-    line('Alex', 'Nothing from me. Read it, then decide for yourself. If I don’t come back, take it to Hamsa.')
+    line('Meera', 'You missed our session, Alex. Last time you said you were losing track of who you were.'),
+    line('Alex', 'Meera, I need you to keep this envelope safe. Read it after I leave.'),
+    line('Meera', 'That’s my boyfriend’s name. What are you saying?'),
+    line('Alex', 'Read it and decide for yourself. If I don’t come back, take it to Hamsa.')
   ],
   rooftop: [
-    line('Alex', 'The yard, the envelope, my file. It was you.'),
-    line('Vishnu', 'And you were Raghavan’s man. I spent weeks looking for somebody in uniform.'),
-    line('Alex', 'Vishnu, you’re under arrest for leaking police operations and conspiring with Kuttappan. Step away from the edge.'),
+    line('Alex', 'You warned Kuttappan about the raid. The envelope lists what he paid you.'),
+    line('Vishnu', 'And you were Raghavan’s undercover officer. I was looking for you.'),
+    line('Alex', 'Vishnu, you’re under arrest for helping Kuttappan. Step away from the edge.'),
     line('Vishnu', 'Where were you going to take me? The station?'),
-    line('Sudhi', 'The same station that paid Kuttappan twice over? He had me there long before you started asking.'),
+    line('Sudhi', 'You thought he only had Vishnu? I’ve been working for Kuttappan for years.'),
     line('Alex', 'Sudhi. Put it down.')
   ],
   coverup: [
-    line('Vishnu', 'Control, this is Vishnu. Suspect Sudhi acted alone.'),
-    line('Narrator', 'Vishnu rewrites the seizure list. Only the papers that implicate Sudhi make it into his report. He doesn’t know what Meera already has.')
+    line('Vishnu', 'This is Vishnu. Sudhi leaked the raid plans and shot Alex. He acted alone.'),
+    line('Narrator', 'Vishnu changes the report to hide his own part. He doesn’t know Meera has the envelope.')
   ],
   goodbye: [
-    line('Meera', 'I kept the papers. I read them twice, hoping I’d misunderstood something.'),
+    line('Meera', 'Alex gave me the envelope. I read it twice, hoping I was wrong.'),
     line('Vishnu', 'Let me explain.'),
     line('Meera', 'I’m pregnant, Vishnu. I wanted to tell you here because this was where I used to feel safe.'),
     line('Vishnu', 'Where will you go?'),
-    line('Meera', 'I’ll let you know when I’m ready. Please don’t follow me.')
+    line('Meera', 'I’m leaving, Vishnu. Please don’t follow me.')
   ],
   home: [
     line('Hamsa', 'You changed the report after midnight. Sudhi appears on every page. You appear on none.'),
     line('Vishnu', 'You were suspended, Hamsa. You weren’t there.'),
-    line('Hamsa', 'No. But I know what an honest report looks like. I never believed yours.'),
+    line('Hamsa', 'No. But I know what an honest report looks like. Yours doesn’t add up.'),
     line('Vishnu', 'Come inside, saar. We can talk.')
   ]
 } satisfies Record<string, readonly Line[]>;

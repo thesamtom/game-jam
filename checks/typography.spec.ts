@@ -33,9 +33,12 @@ test('production uses the supplied Pixelta for DOM and Phaser canvas text', asyn
   await page.screenshot({ path: '.qa/pixelta-desktop-title.png' });
 
   await page.getByRole('button', { name: 'New Game' }).click();
+  await expect(page.locator('.roster-screen h2')).toHaveCSS('font-family', /Pixelta/);
+  await page.getByRole('button', { name: 'Begin Story' }).click();
+  await expect(page.locator('.chapter-intro h2')).toHaveCSS('font-family', /Pixelta/);
+  await page.getByRole('button', { name: 'Start Chapter' }).click();
   await expect(page.locator('.cinematic p')).toHaveCSS('font-family', /Pixelta/);
-  await expect(page.locator('.cinematic .eyebrow')).toHaveCSS('font-family', /Pixelta/);
-  await expect(page.locator('.objective strong')).toHaveText('Talk to SP Raghavan', { timeout: 8000 });
+  await expect(page.locator('.objective strong')).toContainText('Meet SP Raghavan', { timeout: 8000 });
   await expect(page.locator('.objective strong')).toHaveCSS('font-family', /Pixelta/);
   await expect(page.getByRole('button', { name: /Speak to Raghavan/ })).toHaveCSS('font-family', /Pixelta/);
 
